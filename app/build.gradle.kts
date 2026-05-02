@@ -20,11 +20,26 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
+    signingConfigs {
+        create("release") {
+            val ksPath = System.getenv("IMAGEN_KEYSTORE")
+                ?: "${System.getProperty("user.home")}/.android/imagen-release.keystore"
+            val ksFile = file(ksPath)
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = System.getenv("IMAGEN_KEYSTORE_PASSWORD") ?: "imagen2025"
+                keyAlias = System.getenv("IMAGEN_KEY_ALIAS") ?: "imagen"
+                keyPassword = System.getenv("IMAGEN_KEY_PASSWORD") ?: "imagen2025"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false

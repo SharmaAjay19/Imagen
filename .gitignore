@@ -12,3 +12,7 @@ local.properties
 keystore.properties
 /app/release/
 /app/build/
+
+imagen-v*.apk
+local.properties
+

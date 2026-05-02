@@ -73,10 +73,10 @@ class Repository(
         id = e.id,
         sessionId = e.sessionId,
         timestamp = e.timestamp,
+        prompt = e.prompt,
+        inputImagePaths = runCatching {
             Json.decodeFromString(ListSerializer(String.serializer()), e.inputImagePathsJson)
-        }pt = e.prompt,
-        inputImagePaths = runCatching { Json.decodeFromString<List<String>>(e.inputImagePathsJson) }
-            .getOrDefault(emptyList()),
+        }.getOrDefault(emptyList()),
         outputImagePath = e.outputImagePath,
         size = e.size,
         quality = e.quality,
