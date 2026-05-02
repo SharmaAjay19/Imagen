@@ -10,8 +10,11 @@ import com.ajsharm.imagen.data.ImagenDatabase
 import com.ajsharm.imagen.data.PrefsStore
 import com.ajsharm.imagen.data.Repository
 import com.ajsharm.imagen.data.SecureConfigStore
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import java.io.File
+import java.net.Inet4Address
+import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -19,6 +22,20 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 private val Context.appDataStore by preferencesDataStore(name = "imagen_prefs")
+
+/**
+ * DNS resolver that puts IPv4 addresses first in the lookup list. On networks with
+ * broken IPv6 / NAT64 / CLAT (common on Android emulators and some carriers), an
+ * IPv6-first connection attempt can stall until our connect timeout fires before
+ * falling back to IPv4. Returning v4 first lets OkHttp connect quickly.
+ */
+private object Ipv4PreferringDns : Dns {
+    override fun lookup(hostname: String): List<InetAddress> {
+        val all = Dns.SYSTEM.lookup(hostname)
+        val (v4, v6) = all.partition { it is Inet4Address }
+        return v4 + v6
+    }
+}
 
 object ServiceLocator {
     lateinit var appContext: Context
@@ -47,11 +64,12 @@ object ServiceLocator {
         secureConfig = SecureConfigStore(appContext)
         prefs = PrefsStore(appContext.appDataStore)
         val http = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.MINUTES)
             .writeTimeout(10, TimeUnit.MINUTES)
             .callTimeout(0, TimeUnit.SECONDS) // no overall cap; rely on per-stage timeouts and explicit cancellation
             .retryOnConnectionFailure(true)
+            .dns(Ipv4PreferringDns)
             .build()
         azureClient = AzureImageClient(http, secureConfig)
         repository = Repository(db.sessionDao(), db.messageDao(), imageStorage)
