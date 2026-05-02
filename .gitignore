@@ -16,3 +16,5 @@ keystore.properties
 imagen-v*.apk
 local.properties
 
+.release-notes-*.md
+
