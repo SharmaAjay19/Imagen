@@ -21,3 +21,6 @@ config.json
 screen.png
 ui.xml
 logcat.txt
+
+.commitmsg.txt
+
