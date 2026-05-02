@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajsharm.imagen.di.ServiceLocator
@@ -267,6 +268,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 _state.update { it.copy(generation = GenerationStatus.Idle, elapsedMillis = 0L) }
                 throw e
             } catch (e: Throwable) {
+                Log.e("Imagen", "Generation failed", e)
                 val sessionId = _state.value.currentSessionId
                 if (sessionId != null) {
                     val errorMsg = Message(

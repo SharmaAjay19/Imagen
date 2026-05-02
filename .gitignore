@@ -17,4 +17,7 @@ imagen-v*.apk
 local.properties
 
 .release-notes-*.md
-
+config.json
+screen.png
+ui.xml
+logcat.txt
